@@ -317,9 +317,12 @@ app.put('/calendar/event/update', (req, res) => {
 })
 
 app.post('/task/add', async(req, res) => {
+    let reqStatus = null;
+
+    try{
     const reqBody = JSON.stringify(req.body);
     const request = JSON.parse(reqBody)
-    let reqStatus = null;
+
     for (const task of request) {
         const taskContent = task.content;
         const taskID = task.tid;
@@ -345,7 +348,12 @@ app.post('/task/add', async(req, res) => {
         }
         else{
             reqStatus = false;
+            }
         }
+    }
+    catch(e) {
+        reqStatus = false
+        console.log('error: ', e)
     }
     res.json(responseSent(reqStatus))
 })
