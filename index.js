@@ -3,6 +3,8 @@ const express = require('express')
 const app = express()
 const bodyParser = require("body-parser");
 const mysql = require('mysql')
+const cors = require('cors')
+
 const {google} = require('googleapis');
 const port = process.env.port || 8080
 const connection = require("./db.js");
@@ -12,8 +14,8 @@ const client_secret = process.env.CLIENT_SECRET;
 const redirect_uris = ["http://localhost:3000"];
 // const config = require("./msal.config.js")
 
-app.use(bodyParser.json());
-// parse requests of content-type: application/x-www-form-urlencoded
+app.use(cors())
+app.use(bodyParser.json());// parse requests of content-type: application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const auth = new google.auth.OAuth2(
