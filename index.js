@@ -37,6 +37,7 @@ const calendar = google.calendar({
 let con; 
 
 handleDiscount = () => {
+
   con = mysql.createPool(connection); 
   con.getConnection(error => {
     if(error) {
@@ -396,6 +397,48 @@ app.get('/tasks/fetch', async(req, res) => {
     }
 
     res.json(responseSent(valid))
+})
+
+app.get('/tasks/id', async(req, res) => {
+    let valid = true;
+    const query = "SELECT (id) FROM `tasks`;"
+    const sqlRes = await sqlExecute(query, true);
+    let id = 0;
+    for (const task of sqlRes) {
+        console.log('task: ', task)
+        id = task.id;
+    }
+    res.json({
+        'response': 'success',
+        'code': 200,
+        'body': id
+    })
+})
+
+app.delete('/task/delete/:id', async(req,res) => {
+    const id = req.params.id
+    let reqStatus = null;
+    let reqStatus2 = null;
+    const task = req.body.task
+    let query = `DELETE from tasks WHERE id = '${id}' and task = '${task}'`
+    let sqlRes = await sqlExecute(query)
+    reqStatus = !!sqlRes;
+    // SET @id := 0;
+    // UPDATE `tasks` SET `tasks`.`id` = @id:= @id + 1;
+    // SET @Expression = CONCAT("ALTER TABLE `tasks` AUTO_INCREMENT = ", @id);
+    // PREPARE myquery FROM @Expression;
+    // EXECUTE myquery;
+    // DEALLOCATE PREPARE myquery;
+    query = "SET @id = 0;" +
+        "UPDATE " + "`tasks` SET `tasks`.`id` = @id:= @id + 1;" +
+        " SET @Expression = CONCAT('" + "ALTER TABLE" + " " + "`tasks` AUTO_INCREMENT = ', @id);" +
+        " PREPARE myquery FROM @Expression; " +
+        " EXECUTE myquery; " +
+        " DEALLOCATE PREPARE myquery;"
+    sqlRes = await (sqlExecute(query))
+    reqStatus2 = !!sqlRes;
+    const finalStatus = reqStatus && reqStatus2
+    res.json(responseSent(finalStatus))
 })
 
 app.get('/tasks/all', (req, res) => {
