@@ -25,7 +25,9 @@ const auth = new google.auth.OAuth2(
     access_type='offline'
   );
 
+
 auth.setCredentials({ refresh_token: token });
+
 google.options({ auth });
 
 const calendar = google.calendar({
@@ -73,9 +75,11 @@ try{
                     reject(err);
                 } else {
                     if(promiseResolve){
-                        resolve(resp)
-                    }else {
-                        resolve(true);
+                        console.log(resp.insertId)
+                        resolve([resp, resp.insertId])
+                    }
+                    else {
+                        resolve([true, resp.insertId]);
                     }
                 }
             })
@@ -91,18 +95,17 @@ try{
         const hour = h;
         const minutes = minute;
         const second = s;
-
         // console.log('d: ', d, " m: ", m, " y: ", y, " h: ", h, " minute: ", minutes, " second: ", s)
-
+        console.log(`${day} / ${month} / ${year} - ${hour}:${minutes}:${second}`)
         return new Date(year,month,day,hour,minutes,second).toISOString();
     }
 
-    responseSent = (status) => {
+    responseSent = (status, body=null) => {
         if(status){
             return {
                 'response': 'success',
                 'code': 200,
-                'body': null
+                'body': body
             };
         }
         else{
@@ -191,12 +194,14 @@ app.get('/calendar/tasks', (req,res) => {
 });
 
 addCalendarEvent = (event) => {
+    console.log('event: ', event)
     return new Promise((resolve, reject) => {
         calendar.events.insert({
             calendarId: 'primary',
             resource: JSON.parse(JSON.stringify(event))
         }, (err, resp) => {
             if(err){
+                console.log('aCE error: ', err)
                 reject(err);
             } else {
                 if (resp.status === 200 && resp.statusText === 'OK') {
@@ -319,7 +324,7 @@ app.put('/calendar/event/update', (req, res) => {
 
 app.post('/task/add', async(req, res) => {
     let reqStatus = null;
-
+    let body = [];
     try{
     const reqBody = JSON.stringify(req.body);
     const request = JSON.parse(reqBody)
@@ -343,9 +348,13 @@ app.post('/task/add', async(req, res) => {
         VALUES ('${taskContent}', '${category}', '${timestamp}', '${taskDay}', '${taskMonth}', '${taskYear}', '${taskHour}', '${taskMinute}', '${taskSecond}'
         , '${taskID}', '${taskPriority}', '${checked}', '${eventID}');`;
         const sqlRes = await sqlExecute(query);
+        const recordID = sqlRes[1];
+        console.log(`recordID: ${recordID}`)
         if(sqlRes){
             console.log('done!')
             reqStatus = true;
+            const tasktimestamp = new Date(taskYear, taskMonth, taskDay, taskHour, taskMinute, taskSecond).toISOString();
+            body.push(recordID, taskContent, tasktimestamp, timestamp, category)
         }
         else{
             reqStatus = false;
@@ -356,14 +365,14 @@ app.post('/task/add', async(req, res) => {
         reqStatus = false
         console.log('error: ', e)
     }
-    res.json(responseSent(reqStatus))
+    res.json(responseSent(reqStatus, body))
 })
 
 app.post('/tasks/delete', async(req,res) => {
     let valid = true;
     let query = "SELECT (eID) FROM `tasks`;"
     let sqlRes = await sqlExecute(query, true);
-    for (const task of sqlRes) {
+    for (const task of sqlRes[0]) {
         const eventID = task.eID;
         const apiResponse = await removeCalendarEvent(eventID)
         if(!apiResponse){
@@ -372,12 +381,7 @@ app.post('/tasks/delete', async(req,res) => {
     }
     query = 'TRUNCATE `tasks`;'
     sqlRes = await sqlExecute(query)
-    if(sqlRes){
-        reqStatus = true;
-    }
-    else{
-        reqStatus = false;
-    }
+    reqStatus = !!sqlRes[0];
 
     res.json(responseSent(reqStatus))
 })
@@ -422,7 +426,7 @@ app.delete('/task/delete/:id', async(req,res) => {
     const task = req.body.task
     let query = `DELETE from tasks WHERE id = '${id}' and task = '${task}'`
     let sqlRes = await sqlExecute(query)
-    reqStatus = !!sqlRes;
+    reqStatus = !!sqlRes[0];
     // SET @id := 0;
     // UPDATE `tasks` SET `tasks`.`id` = @id:= @id + 1;
     // SET @Expression = CONCAT("ALTER TABLE `tasks` AUTO_INCREMENT = ", @id);
