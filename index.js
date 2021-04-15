@@ -419,11 +419,15 @@ app.get('/tasks/id', async(req, res) => {
     })
 })
 
-app.delete('/task/delete/:id', async(req,res) => {
+app.delete('/task/delete/:id/:eid', async(req,res) => {
     const id = req.params.id
     let reqStatus = null;
     let reqStatus2 = null;
     const task = req.body.task
+    const eventID = req.params.eid
+    console.log(`taskID: ${task} eventID: ${eventID}`)
+    const apiResponse = await removeCalendarEvent(eventID)
+
     let query = `DELETE from tasks WHERE id = '${id}' and task = '${task}'`
     let sqlRes = await sqlExecute(query)
     reqStatus = !!sqlRes[0];
@@ -441,7 +445,7 @@ app.delete('/task/delete/:id', async(req,res) => {
         " DEALLOCATE PREPARE myquery;"
     sqlRes = await (sqlExecute(query))
     reqStatus2 = !!sqlRes;
-    const finalStatus = reqStatus && reqStatus2
+    const finalStatus = reqStatus && reqStatus2 && apiResponse
     res.json(responseSent(finalStatus))
 })
 
@@ -466,7 +470,7 @@ app.get('/tasks/all', (req, res) => {
                  const taskSecond = row.taskSecond;
                  const taskID = row.tID;
                  const priority = row.priority;
-                  console.log('Checked: ',checked);
+                 const eID = row.eID;
                  response.push({
                      "id": tID,
                      "tID": taskID,
@@ -480,7 +484,8 @@ app.get('/tasks/all', (req, res) => {
                      "taskMinute": taskMinute,
                      "taskSecond": taskSecond,
                      "timestamp": timestamp,
-                     "taskChecked": checked
+                     "taskChecked": checked,
+                     "eID": eID
                  })
              })
              res.json(JSON.parse(JSON.stringify(response)))

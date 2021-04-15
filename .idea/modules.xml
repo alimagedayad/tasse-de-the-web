@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../ayad.xyz/.idea/ayad.xyz.iml" filepath="$PROJECT_DIR$/../ayad.xyz/.idea/ayad.xyz.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/projWeb.iml" filepath="$PROJECT_DIR$/.idea/projWeb.iml" />
       <module fileurl="file://$PROJECT_DIR$/../todoWeb/.idea/todoWeb.iml" filepath="$PROJECT_DIR$/../todoWeb/.idea/todoWeb.iml" />
     </modules>

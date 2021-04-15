@@ -9,5 +9,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="todoWeb" />
+    <orderEntry type="module" module-name="ayad.xyz" />
   </component>
 </module>
