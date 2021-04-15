@@ -4,7 +4,7 @@ const app = express()
 const bodyParser = require("body-parser");
 const mysql = require('mysql')
 const cors = require('cors')
-
+const path = require('path')
 const {google} = require('googleapis');
 const port = process.env.port || 8080
 const connection = require("./db.js");
@@ -13,7 +13,7 @@ const client_id = process.env.CLIENT_ID;
 const client_secret = process.env.CLIENT_SECRET;
 const redirect_uris = ["http://localhost:3000"];
 // const config = require("./msal.config.js")
-
+app.use(express.static(path.join(__dirname, 'build')));
 app.use(cors())
 app.use(bodyParser.json());// parse requests of content-type: application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -494,8 +494,12 @@ app.get('/tasks/all', (req, res) => {
      })
 });
 
-app.get('/', (req,res) => {
-    res.json({message: "Welcome!"})
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+app.get('/test', (req, res) => {
+    res.send('/test')
 })
 
 app.listen(port, () => {
