@@ -322,14 +322,24 @@ app.put('/calendar/event/update', (req, res) => {
     })
 })
 
+function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+}
+
 app.post('/task/add', async(req, res) => {
     let reqStatus = null;
     let body = [];
     try{
     const reqBody = JSON.stringify(req.body);
     const request = JSON.parse(reqBody)
-
     for (const task of request) {
+        console.log("request json: ", task)
+        let taskSubs;
+        if(task.taskSubs && Object.keys(task.taskSubs).length === 0 && task.taskSubs.constructor === Object){
+            taskSubs = null;
+        }else{
+            taskSubs = JSON.stringify(task.taskSubs.subtasks)
+        }
         const taskContent = task.content;
         const taskID = task.tid;
         const taskPriority = task.taskPriority;
@@ -344,9 +354,9 @@ app.post('/task/add', async(req, res) => {
         const checked = task.taskChecked;
         const event = eventBuilder(taskContent, taskYear, taskMonth, taskDay, taskHour, taskMinute, taskSecond, taskYear, taskMonth, taskDay, taskHour, taskMinute, taskSecond);
         const eventID = await addCalendarEvent(event)
-        const query = `INSERT INTO tasks(task, category, timestamp, taskDay, taskMonth, taskYear, taskHour, taskMinute, taskSecond, tID, priority,taskChecked, eID)  
+        const query = `INSERT INTO tasks(task, category, timestamp, taskDay, taskMonth, taskYear, taskHour, taskMinute, taskSecond, tID, priority,taskChecked, eID, subtask)  
         VALUES ('${taskContent}', '${category}', '${timestamp}', '${taskDay}', '${taskMonth}', '${taskYear}', '${taskHour}', '${taskMinute}', '${taskSecond}'
-        , '${taskID}', '${taskPriority}', '${checked}', '${eventID}');`;
+        , '${taskID}', '${taskPriority}', '${checked}', '${eventID}', '${taskSubs}');`;
         const sqlRes = await sqlExecute(query);
         const recordID = sqlRes[1];
         console.log(`recordID: ${recordID}`)
@@ -408,9 +418,10 @@ app.get('/tasks/id', async(req, res) => {
     const query = "SELECT (id) FROM `tasks`;"
     const sqlRes = await sqlExecute(query, true);
     let id = 0;
-    for (const task of sqlRes) {
-        console.log('task: ', task)
-        id = task.id;
+    for (const task of sqlRes[0]) {
+        const res = JSON.parse(JSON.stringify(task))
+        console.log('task: ', res.id)
+        id = res.id;
     }
     res.json({
         'response': 'success',
@@ -469,6 +480,7 @@ app.get('/tasks/all', (req, res) => {
                  const taskMinute = row.taskMinute;
                  const taskSecond = row.taskSecond;
                  const taskID = row.tID;
+                 const taskSub = row.subtask;
                  const priority = row.priority;
                  const eID = row.eID;
                  response.push({
@@ -477,6 +489,7 @@ app.get('/tasks/all', (req, res) => {
                      "task": task,
                      "category": category,
                      "priority": priority,
+                     "taskSubs": JSON.parse(taskSub),
                      "taskDay": taskDay,
                      "taskMonth": taskMonth,
                      "taskYear": taskYear,
