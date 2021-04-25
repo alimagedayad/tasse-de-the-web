@@ -1,12 +1,11 @@
-const mysql = require("mysql");
-const dbConfig = require("./db.config.js");
+require("dotenv").config();
 
 // Create a connection to the database
 const connection = {
-    host: dbConfig.HOST,
-    user: dbConfig.USER,
-    password: dbConfig.PASSWORD,
-    database: dbConfig.DB,
+    host: process.env.DBHOST,
+    user: process.env.DBUSER,
+    password: process.env.DBPASSWORD,
+    database: process.env.DB,
     multipleStatements: true
 };
 
