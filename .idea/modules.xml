@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../ayad.xyz/.idea/ayad.xyz.iml" filepath="$PROJECT_DIR$/../ayad.xyz/.idea/ayad.xyz.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/projWeb.iml" filepath="$PROJECT_DIR$/.idea/projWeb.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../todoWeb/.idea/todoWeb.iml" filepath="$PROJECT_DIR$/../todoWeb/.idea/todoWeb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../projweb2/.idea/projweb2.iml" filepath="$PROJECT_DIR$/../projweb2/.idea/projweb2.iml" />
     </modules>
   </component>
 </project>
