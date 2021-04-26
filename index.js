@@ -480,16 +480,26 @@ app.get('/tasks/all', (req, res) => {
                  const taskMinute = row.taskMinute;
                  const taskSecond = row.taskSecond;
                  const taskID = row.tID;
-                 const taskSub = row.subtask;
+                 let taskSub;
+                 if(row.subtask === 'undefined'){
+                     taskSub = {}
+                 }
+                 else
+                 {
+                     taskSub = JSON.parse(row.subtask)
+                 }
                  const priority = row.priority;
                  const eID = row.eID;
+
+                 console.log('taskSub: ', taskSub)
+
                  response.push({
                      "id": tID,
                      "tID": taskID,
                      "task": task,
                      "category": category,
                      "priority": priority,
-                     "taskSubs": JSON.parse(taskSub),
+                     "taskSubs": taskSub,
                      "taskDay": taskDay,
                      "taskMonth": taskMonth,
                      "taskYear": taskYear,
